@@ -1,0 +1,4 @@
+2026-05-15 19:31:01,197 [INFO    ] __main__: Starting StatusHub …
+2026-05-15 19:31:01,198 [INFO    ] src.utils.config_manager: Config file not found; creating with defaults.
+2026-05-15 19:31:01,402 [DEBUG   ] src.ui.main_window: Background workers started.
+2026-05-15 19:31:01,403 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.

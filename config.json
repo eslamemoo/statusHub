@@ -1,0 +1,24 @@
+{
+    "app": {
+        "theme": "dark",
+        "language": "en",
+        "window_width": 1200,
+        "window_height": 750
+    },
+    "monitor": {
+        "poll_interval_seconds": 2.0
+    },
+    "weather": {
+        "api_key": "",
+        "city": "Cairo",
+        "poll_interval_seconds": 600
+    },
+    "serial": {
+        "port": "",
+        "baud_rate": 115200
+    },
+    "themes": {
+        "active_theme": "default",
+        "custom_themes": {}
+    }
+}
