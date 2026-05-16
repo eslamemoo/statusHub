@@ -45,235 +45,337 @@ def _configure_logging() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Global stylesheet (dark theme)
+# Global stylesheet — premium dark theme
 # ---------------------------------------------------------------------------
 
 DARK_STYLESHEET = """
-/* ── Application-wide reset ───────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════
+   STATUShub — Premium Dark Theme
+   Palette
+     base ............... #121212   deepest background layer
+     surface ............ #1e1e2a   card / panel surfaces
+     surface-raised ..... #252535   elevated elements (group titles, inputs)
+     border ............. #2d2d42   subtle border
+     border-focus ....... #4f8ef7   accent blue for focus glow
+     accent-blue ........ #4f8ef7
+     accent-purple ...... #a371f7
+     accent-green ....... #3fb950
+     text-primary ....... #e8eaf0
+     text-muted ......... #6b7280
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Global reset ────────────────────────────────────────────────── */
 * {
-    font-family: "Segoe UI", "Inter", "SF Pro Display", sans-serif;
-    color: #e6edf3;
-    box-sizing: border-box;
+    font-family: "Inter", "Segoe UI", "SF Pro Display", sans-serif;
+    color: #e8eaf0;
+    outline: none;
 }
 
-QMainWindow, QWidget {
-    background-color: #0d1117;
+QMainWindow, QDialog {
+    background-color: #121212;
 }
 
-/* ── Sidebar ───────────────────────────────────────────────────────── */
+QWidget {
+    background-color: #121212;
+}
+
+/* ── 2. Sidebar ─────────────────────────────────────────────────────── */
 QWidget#sidebar {
-    background-color: #010409;
-    border-right: 1px solid #21262d;
+    background-color: #0c0c14;
+    border-right: 1px solid #2d2d42;
 }
 
 QLabel#sidebarHeader {
-    background-color: #010409;
-    color: #58a6ff;
-    padding-left: 8px;
-    border-bottom: 1px solid #21262d;
+    background-color: #0c0c14;
+    color: #4f8ef7;
+    padding-left: 12px;
+    border-bottom: 1px solid #2d2d42;
+    font-size: 15px;
+    font-weight: bold;
 }
 
 QLabel#sidebarVersion {
-    color: #484f58;
-    font-size: 11px;
-    padding: 8px;
+    color: #3d3d55;
+    font-size: 10px;
+    padding: 10px 12px;
 }
 
 QFrame#sidebarSeparator {
-    color: #21262d;
+    color: #2d2d42;
     max-width: 1px;
 }
 
-/* ── Nav buttons ───────────────────────────────────────────────────── */
+/* ── 3. Nav buttons ─────────────────────────────────────────────────── */
 QPushButton#navButton {
     background-color: transparent;
     border: none;
     border-left: 3px solid transparent;
-    color: #8b949e;
+    color: #6b7280;
     text-align: left;
-    padding: 10px 16px;
+    padding: 12px 18px;
+    font-size: 12px;
 }
 
 QPushButton#navButton:hover {
-    background-color: #161b22;
-    color: #e6edf3;
+    background-color: #1e1e2a;
+    color: #e8eaf0;
 }
 
 QPushButton#navButton:checked {
-    background-color: #161b22;
-    border-left: 3px solid #58a6ff;
-    color: #58a6ff;
+    background-color: #1e1e2a;
+    border-left: 3px solid #4f8ef7;
+    color: #4f8ef7;
     font-weight: bold;
 }
 
-/* ── Group boxes ───────────────────────────────────────────────────── */
+/* ── 4. Group boxes ─────────────────────────────────────────────────── */
 QGroupBox {
-    background-color: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 8px;
-    margin-top: 14px;
-    padding: 12px 10px 10px 10px;
+    background-color: #1e1e2a;
+    border: 1px solid #2d2d42;
+    border-radius: 12px;
+    margin-top: 16px;
+    padding: 16px 12px 12px 12px;
     font-weight: bold;
-    font-size: 13px;
-    color: #8b949e;
+    font-size: 12px;
+    color: #6b7280;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 6px;
-    color: #8b949e;
+    left: 14px;
+    padding: 0 8px;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
 }
 
-/* ── Metric cards ──────────────────────────────────────────────────── */
+/* ── 5. Metric cards ────────────────────────────────────────────────── */
 QWidget#metricCard {
-    background-color: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 10px;
+    background-color: #252535;
+    border: 1px solid #2d2d42;
+    border-radius: 14px;
 }
 
 QLabel#cardTitle {
-    color: #8b949e;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    color: #6b7280;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 QLabel#cardValue {
-    color: #e6edf3;
+    color: #e8eaf0;
+    font-weight: 700;
 }
 
-/* ── Progress bars ─────────────────────────────────────────────────── */
-QProgressBar#metricBar {
-    background-color: #21262d;
+/* ── 6. Progress bars — per-resource accent colours ────────────────── */
+QProgressBar#metricBarCpu,
+QProgressBar#metricBarRam,
+QProgressBar#metricBarTemp {
+    background-color: #2d2d42;
     border: none;
-    border-radius: 7px;
+    border-radius: 6px;
 }
 
-QProgressBar#metricBar::chunk {
+/* CPU — vibrant blue */
+QProgressBar#metricBarCpu::chunk {
     background: qlineargradient(
         x1:0, y1:0, x2:1, y2:0,
-        stop:0 #1f6feb, stop:1 #58a6ff
+        stop:0 #1a5fc8, stop:0.6 #4f8ef7, stop:1 #7fb3ff
     );
-    border-radius: 7px;
+    border-radius: 6px;
 }
 
-/* ── Weather labels ────────────────────────────────────────────────── */
+/* RAM — vivid purple */
+QProgressBar#metricBarRam::chunk {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5a2da0, stop:0.6 #a371f7, stop:1 #c49dff
+    );
+    border-radius: 6px;
+}
+
+/* CPU Temp — rich green */
+QProgressBar#metricBarTemp::chunk {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1a6e30, stop:0.6 #3fb950, stop:1 #6dda82
+    );
+    border-radius: 6px;
+}
+
+/* ── 7. Weather panel ───────────────────────────────────────────────── */
 QLabel#weatherCaption {
-    color: #484f58;
+    color: #4a4a62;
     font-size: 10px;
+    font-weight: 500;
 }
 
 QLabel#weatherValue {
-    color: #e6edf3;
+    color: #e8eaf0;
+    font-weight: 600;
 }
 
-/* ── Status / detail labels ────────────────────────────────────────── */
-QLabel#statusLabel, QLabel#ramDetail {
-    color: #484f58;
+QLabel#weatherIcon {
+    background-color: transparent;
+}
+
+/* ── 8. Status / detail labels ──────────────────────────────────────── */
+QLabel#statusLabel {
+    color: #4a4a62;
     font-size: 11px;
-    padding: 2px 0;
+    padding: 4px 0;
 }
 
-/* ── Form inputs ───────────────────────────────────────────────────── */
+QLabel#ramDetail {
+    color: #4a4a62;
+    font-size: 10px;
+    padding: 1px 0;
+}
+
+/* ── 9. Form inputs ─────────────────────────────────────────────────── */
 QLineEdit, QComboBox {
-    background-color: #21262d;
-    border: 1px solid #30363d;
-    border-radius: 6px;
-    padding: 6px 10px;
-    color: #e6edf3;
-    selection-background-color: #1f6feb;
+    background-color: #252535;
+    border: 1px solid #2d2d42;
+    border-radius: 8px;
+    padding: 7px 12px;
+    color: #e8eaf0;
+    font-size: 12px;
+    selection-background-color: #4f8ef7;
 }
 
 QLineEdit:focus, QComboBox:focus {
-    border: 1px solid #58a6ff;
+    border: 1px solid #4f8ef7;
+    background-color: #2a2a3e;
 }
 
 QComboBox::drop-down {
     border: none;
-    width: 20px;
+    width: 22px;
+}
+
+QComboBox::down-arrow {
+    width: 10px;
+    height: 10px;
 }
 
 QComboBox QAbstractItemView {
-    background-color: #161b22;
-    border: 1px solid #30363d;
-    selection-background-color: #1f6feb;
+    background-color: #1e1e2a;
+    border: 1px solid #2d2d42;
+    border-radius: 8px;
+    padding: 4px;
+    selection-background-color: #4f8ef7;
+    selection-color: #ffffff;
+    outline: none;
 }
 
-/* ── Buttons ───────────────────────────────────────────────────────── */
+/* ── 10. Buttons ────────────────────────────────────────────────────── */
 QPushButton {
-    background-color: #21262d;
-    border: 1px solid #30363d;
-    border-radius: 6px;
-    padding: 7px 16px;
-    color: #e6edf3;
+    background-color: #252535;
+    border: 1px solid #2d2d42;
+    border-radius: 8px;
+    padding: 8px 18px;
+    color: #e8eaf0;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 QPushButton:hover {
-    background-color: #30363d;
-    border-color: #8b949e;
+    background-color: #2d2d42;
+    border-color: #4a4a62;
+    color: #ffffff;
 }
 
 QPushButton:pressed {
-    background-color: #161b22;
+    background-color: #1e1e2a;
+    border-color: #4f8ef7;
 }
 
 QPushButton#primaryButton {
-    background-color: #1f6feb;
-    border: 1px solid #388bfd;
+    background-color: #4f8ef7;
+    border: 1px solid #6aa3ff;
     color: #ffffff;
-    font-weight: bold;
-}
-
-QPushButton#primaryButton:hover {
-    background-color: #388bfd;
-}
-
-QPushButton#primaryButton:pressed {
-    background-color: #1158c7;
-}
-
-/* ── Display preview frame ─────────────────────────────────────────── */
-QFrame#displayPreview {
-    background-color: #010409;
-    border: 2px solid #21262d;
+    font-weight: 700;
     border-radius: 8px;
 }
 
-QLabel#previewPlaceholder {
-    color: #484f58;
-    font-size: 13px;
+QPushButton#primaryButton:hover {
+    background-color: #6aa3ff;
+    border-color: #88bbff;
 }
 
+QPushButton#primaryButton:pressed {
+    background-color: #3570d4;
+}
+
+/* ── 11. Hex label (colour token readout) ───────────────────────────── */
 QLabel#hexLabel {
-    color: #484f58;
+    color: #4a4a62;
     font-size: 11px;
-    font-family: monospace;
+    font-family: "Consolas", "Courier New", monospace;
 }
 
-/* ── Status bar ────────────────────────────────────────────────────── */
+/* ── 12. Preview hint label ─────────────────────────────────────────── */
+QLabel#previewPlaceholder {
+    color: #3d3d55;
+    font-size: 11px;
+}
+
+/* ── 13. Status bar ─────────────────────────────────────────────────── */
 QStatusBar#appStatusBar {
-    background-color: #010409;
-    border-top: 1px solid #21262d;
-    color: #8b949e;
+    background-color: #0c0c14;
+    border-top: 1px solid #2d2d42;
+    color: #6b7280;
     font-size: 11px;
 }
 
-/* ── Scrollbars ────────────────────────────────────────────────────── */
+/* ── 14. Scrollbars ─────────────────────────────────────────────────── */
 QScrollBar:vertical {
-    background: #161b22;
-    width: 8px;
-    border-radius: 4px;
+    background: #1e1e2a;
+    width: 6px;
+    border-radius: 3px;
+    margin: 0;
 }
 
 QScrollBar::handle:vertical {
-    background: #30363d;
-    border-radius: 4px;
-    min-height: 20px;
+    background: #2d2d42;
+    border-radius: 3px;
+    min-height: 24px;
 }
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+QScrollBar::handle:vertical:hover {
+    background: #4a4a62;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
     height: 0;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    background: #1e1e2a;
+    height: 6px;
+    border-radius: 3px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #2d2d42;
+    border-radius: 3px;
+    min-width: 24px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #4a4a62;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
 }
 """
 
@@ -303,11 +405,12 @@ def main() -> int:
     app.setApplicationVersion("0.1.0")
     app.setOrganizationName("StatusHub Project")
 
-    # Apply a clean default font before the stylesheet takes over
-    default_font = QFont("Segoe UI", 10)
+    # Apply a clean default font before the stylesheet takes over.
+    default_font = QFont("Inter", 10)
+    default_font.setHintingPreference(QFont.HintingPreference.PreferFullHinting)
     app.setFont(default_font)
 
-    # Apply the global dark stylesheet
+    # Apply the global dark stylesheet.
     app.setStyleSheet(DARK_STYLESHEET)
 
     window = MainWindow(config=config)

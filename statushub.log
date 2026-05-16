@@ -2,3 +2,227 @@
 2026-05-15 19:31:01,198 [INFO    ] src.utils.config_manager: Config file not found; creating with defaults.
 2026-05-15 19:31:01,402 [DEBUG   ] src.ui.main_window: Background workers started.
 2026-05-15 19:31:01,403 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
+2026-05-15 19:43:53,198 [INFO    ] __main__: Starting StatusHub …
+2026-05-15 19:43:53,198 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 19:43:53,420 [DEBUG   ] src.ui.main_window: Background workers started.
+2026-05-15 19:43:53,421 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
+2026-05-15 19:53:45,746 [INFO    ] __main__: Starting StatusHub …
+2026-05-15 19:53:45,746 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 19:53:45,925 [DEBUG   ] src.ui.main_window: Background workers started.
+2026-05-15 19:53:45,925 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
+2026-05-15 19:53:46,022 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:53:47,981 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:53:49,995 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:53:52,010 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:53:54,023 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:53:56,036 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:53:58,049 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:00,062 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:02,075 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:04,094 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:06,107 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:08,124 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:10,140 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:12,156 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:14,172 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:16,184 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:18,202 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:20,215 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:22,237 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:24,244 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:26,261 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:28,280 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:30,293 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:32,310 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:34,343 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:36,359 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:38,373 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:40,390 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:42,406 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:44,427 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:46,442 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:48,456 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:50,472 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:52,485 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:54,499 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:56,516 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:54:58,532 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:00,547 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:02,562 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:04,577 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:06,612 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:08,628 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:10,640 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:12,661 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:14,677 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:16,692 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:18,709 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:20,723 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:22,737 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:24,752 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:26,769 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:28,786 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:30,800 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:32,815 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:34,828 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:36,847 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:38,864 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:40,877 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:42,893 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:44,907 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:46,921 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:48,935 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:50,954 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:52,971 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:54,987 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:57,004 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:55:59,021 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:01,038 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:03,055 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:05,072 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:07,089 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:09,102 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:11,118 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:13,134 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:15,148 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:17,162 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:19,178 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:21,194 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:23,210 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:25,226 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:27,240 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:29,257 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:31,277 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:33,292 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:35,309 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:37,327 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:39,346 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:41,363 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:43,376 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:45,392 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:47,409 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:49,425 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:51,442 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:53,456 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:55,471 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:57,488 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:56:59,505 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:01,523 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:03,536 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:05,556 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:07,572 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:09,602 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:11,611 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:13,629 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:15,644 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:17,669 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:19,685 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:21,704 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:23,717 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:25,737 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:27,753 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:29,769 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:31,785 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:33,800 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:35,815 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:37,832 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:39,849 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:41,863 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:43,878 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:45,892 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:47,908 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:49,922 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:51,941 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:53,957 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:55,970 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:57,986 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:57:59,999 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:02,012 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:04,027 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:06,043 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:08,060 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:10,075 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:12,092 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:14,108 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:16,121 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:18,140 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:20,152 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:22,169 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:24,185 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:26,202 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:28,221 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:30,238 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:32,255 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:34,272 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:36,285 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:38,301 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:40,318 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:42,332 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:44,349 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:46,367 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:48,380 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:50,396 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:52,412 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:54,425 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:56,442 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:58:58,455 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:00,471 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:02,488 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:04,504 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:06,519 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:08,536 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:10,549 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:12,563 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:14,578 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:16,592 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:18,609 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:20,625 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:22,639 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:24,652 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:26,668 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:28,684 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:30,696 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:32,709 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:34,723 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:36,739 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:38,756 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:40,773 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:42,790 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:44,805 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:46,819 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:48,832 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:50,848 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:52,865 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:54,879 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:56,896 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 19:59:58,911 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:00,926 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:02,946 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:04,962 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:06,979 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:08,995 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:11,009 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:13,026 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:15,039 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:17,057 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:19,076 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:00:21,093 [DEBUG   ] src.ui.dashboard_tab: on_stats_update: widget deleted during update, skipping.
+2026-05-15 20:09:33,847 [INFO    ] __main__: Starting StatusHub …
+2026-05-15 20:09:33,847 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 20:09:34,021 [DEBUG   ] src.ui.main_window: Background workers started.
+2026-05-15 20:09:34,022 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
+2026-05-15 20:10:45,510 [INFO    ] src.ui.theme_builder_tab: [ThemeBuilder] Save → {'name': 'Untitled', 'colors': {'background': '#0a1a0a', 'surface': '#33d17a', 'primary': '#3fb950', 'secondary': '#a3e4a8', 'text': '#d4f1d8', 'muted': '#9141ac', 'warning': '#c9a227', 'danger': '#d62828'}}
+2026-05-15 20:10:58,815 [DEBUG   ] src.utils.config_manager: Config saved to /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 20:10:59,047 [DEBUG   ] src.ui.main_window: Background workers stopped.
+2026-05-15 20:10:59,048 [INFO    ] __main__: StatusHub exited with code 0.
+2026-05-15 20:11:05,429 [INFO    ] __main__: Starting StatusHub …
+2026-05-15 20:11:05,430 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 20:11:05,614 [DEBUG   ] src.ui.main_window: Background workers started.
+2026-05-15 20:11:05,615 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
+2026-05-15 20:20:58,064 [DEBUG   ] src.utils.config_manager: Config saved to /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 20:20:58,291 [DEBUG   ] src.ui.main_window: Background workers stopped.
+2026-05-15 20:20:58,292 [INFO    ] __main__: StatusHub exited with code 0.
+2026-05-15 20:21:02,886 [INFO    ] __main__: Starting StatusHub …
+2026-05-15 20:21:02,886 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-15 20:21:03,088 [DEBUG   ] src.ui.main_window: Background workers started.
+2026-05-15 20:21:03,088 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
