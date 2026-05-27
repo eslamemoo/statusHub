@@ -20,9 +20,9 @@ Usage example
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QRectF, Qt, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, QRectF, Qt, pyqtProperty
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen
-from PyQt6.QtWidgets import QWidget, QSizePolicy
+from PyQt6.QtWidgets import QSizePolicy, QWidget
 
 
 # ---------------------------------------------------------------------------

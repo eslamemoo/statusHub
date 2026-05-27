@@ -12,22 +12,23 @@ Supported metrics
 - CPU temperature (cross-platform; returns 0.0 when sensors are unavailable)
 """
 
-import time
 import logging
-import subprocess
-from dataclasses import dataclass, asdict
-from typing import Optional, List
 import platform
+import subprocess
+import time
+from dataclasses import asdict, dataclass
+from typing import List
 
 import psutil
+from PyQt6.QtCore import QObject, pyqtSignal
+
 try:
     import pynvml
     HAS_NVML = True
 except ImportError:
     HAS_NVML = False
-from PyQt6.QtCore import QObject, pyqtSignal
 
-from src.core.types import SystemStatsDict, ErrorInfo
+from src.core.types import ErrorInfo
 
 
 # ---------------------------------------------------------------------------

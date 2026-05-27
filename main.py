@@ -18,7 +18,6 @@ Usage
 
 import logging
 import sys
-import time
 from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
@@ -414,11 +413,8 @@ def main() -> int:
     # Apply the global dark stylesheet.
     app.setStyleSheet(DARK_STYLESHEET)
 
-    # Show Splash Screen
     splash = SplashScreen()
     splash.show()
-    
-    # Initialize MainWindow with splash screen reference
     window = MainWindow(config=config, splash=splash)
 
     exit_code = app.exec()

@@ -591,3 +591,12 @@
 2026-05-27 19:21:23,075 [DEBUG   ] src.utils.config_manager: Config saved to /home/eslam/Eslam/projects/python/statusHub/config.json.
 2026-05-27 19:21:23,542 [DEBUG   ] src.ui.main_window: Background worker threads stopped.
 2026-05-27 19:21:23,549 [INFO    ] __main__: StatusHub exited with code 0.
+2026-05-27 19:25:58,983 [INFO    ] __main__: Starting StatusHub …
+2026-05-27 19:25:58,983 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-27 19:29:31,580 [INFO    ] __main__: Starting StatusHub …
+2026-05-27 19:29:31,581 [DEBUG   ] src.utils.config_manager: Config loaded from /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-27 19:29:31,865 [DEBUG   ] src.ui.main_window: Background worker threads started.
+2026-05-27 19:29:31,866 [INFO    ] src.ui.main_window: StatusHub 0.1.0 started.
+2026-05-27 19:30:29,764 [DEBUG   ] src.utils.config_manager: Config saved to /home/eslam/Eslam/projects/python/statusHub/config.json.
+2026-05-27 19:30:29,966 [DEBUG   ] src.ui.main_window: Background worker threads stopped.
+2026-05-27 19:30:29,969 [INFO    ] __main__: StatusHub exited with code 0.

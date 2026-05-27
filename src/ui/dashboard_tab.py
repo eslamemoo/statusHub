@@ -44,29 +44,26 @@ displays it in a dedicated :class:`QLabel`.
 import logging
 
 from PyQt6 import sip
+from PyQt6.QtCore import QEvent, QSize, Qt, QUrl, pyqtSlot
+from PyQt6.QtGui import QColor, QFont, QPixmap
+from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QGroupBox,
-    QSizePolicy,
-    QScrollArea,
-    QProgressBar,
     QFrame,
     QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
     QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtCore import Qt, pyqtSlot, QEvent, QUrl, QSize
-from PyQt6.QtGui import QFont, QPixmap, QColor
-from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-
 import qtawesome as qta
 
+from src.core.types import ErrorInfo, SystemStatsDict, WeatherDataDict
 from src.ui.custom_widgets import CircularGauge, get_dynamic_color
-from src.ui.utils.flow_layout import FlowLayout
-from src.ui.utils.dynamic_grid_layout import DynamicGridLayout
-from src.core.types import SystemStatsDict, WeatherDataDict, ErrorInfo
 
 logger = logging.getLogger(__name__)
 
@@ -110,16 +107,14 @@ class GaugeCard(QWidget):
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
-        self._unit = unit
-        self._max_value = max_value
-        self._build_ui(title, color, label, max_value)
+        self._build_ui(title, color, label, max_value, unit)
 
     # ------------------------------------------------------------------
     # Construction
     # ------------------------------------------------------------------
 
     def _build_ui(
-        self, title: str, color: QColor, label: str, max_value: float
+        self, title: str, color: QColor, label: str, max_value: float, unit: str
     ) -> None:
         """Build the internal layout: circular gauge → optional detail."""
         layout = QVBoxLayout(self)
@@ -132,7 +127,7 @@ class GaugeCard(QWidget):
         self._gauge = CircularGauge(
             color=color,
             label=label,
-            unit=self._unit,
+            unit=unit,
             max_value=max_value,
         )
 
@@ -533,7 +528,6 @@ class CPUDetailCard(DetailCard):
 
     def update_stats(self, stats: SystemStatsDict):
         cores_pct = stats.get("cpu_cores_percent", [])
-        cores_freq = stats.get("cpu_cores_freq", [])
         
         # Dynamically create bars if needed
         if not self.bars:

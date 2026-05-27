@@ -16,23 +16,31 @@ Responsibilities
 
 import logging
 
-from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-    QPushButton, QStackedWidget, QLabel, QSizePolicy,
-    QStatusBar, QFrame, QGraphicsOpacityEffect, QButtonGroup,
-)
-from PyQt6.QtCore import Qt, QSize, pyqtSlot, QThread, QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QTimer
+from PyQt6.QtCore import QEasingCurve, QParallelAnimationGroup, QPropertyAnimation, QSize, Qt, QThread, QTimer, pyqtSlot
+from PyQt6.QtGui import QFont, QResizeEvent
 from PyQt6.QtNetwork import QNetworkAccessManager
-from PyQt6.QtGui import QIcon, QFont, QResizeEvent
+from PyQt6.QtWidgets import (
+    QButtonGroup,
+    QFrame,
+    QGraphicsOpacityEffect,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QStackedWidget,
+    QStatusBar,
+    QVBoxLayout,
+    QWidget,
+)
 import qtawesome as qta
 
+from src.core.serial_manager import SerialManager
 from src.core.sys_monitor import SystemMonitorWorker
 from src.core.weather_fetcher import WeatherFetcherWorker
-from src.core.serial_manager import SerialManager
 from src.ui.dashboard_tab import DashboardTab
+from src.ui.splash_screen import SplashScreen
 from src.ui.theme_builder_tab import ThemeBuilderTab
 from src.ui.weather_tab import WeatherTab
-from src.ui.splash_screen import SplashScreen
 from src.utils.config_manager import ConfigManager
 
 logger = logging.getLogger(__name__)
@@ -161,13 +169,9 @@ class MainWindow(QMainWindow):
         self._connect_signals()
         self._start_workers()
 
-        # Start hybrid initialization timers
         if self._splash:
-            # Task 1 & 2: Start smooth progress animation and sync with handshake
             self._splash.start_progress_animation(3500)
             self._splash.animation_finished.connect(self._on_min_time_elapsed)
-
-            # Critical Rule: 6 second safety timeout
             QTimer.singleShot(6000, self._force_initialization)
 
         logger.info("%s %s started.", self.APP_NAME, self.APP_VERSION)
@@ -246,7 +250,6 @@ class MainWindow(QMainWindow):
         sidebar = self._build_sidebar()
         main_layout.addWidget(sidebar)
         
-        # Vertical separator line (moved AFTER the sidebar so it stays beside it)
         separator = QFrame()
         separator.setFrameShape(QFrame.Shape.VLine)
         separator.setObjectName("sidebarSeparator")
@@ -263,18 +266,15 @@ class MainWindow(QMainWindow):
         self._dashboard_tab = DashboardTab(nam=self._nam)
         self._weather_tab = WeatherTab()
         self._theme_tab = ThemeBuilderTab()
-        
         self._stack.addWidget(self._dashboard_tab)   # index 0
         self._stack.addWidget(self._weather_tab)     # index 1
         self._stack.addWidget(self._theme_tab)       # index 2
         content_layout.addWidget(self._stack, stretch=1)
 
-        # Pin "Live" status to the bottom of the main content
-        # Task 2: Completely Purge Duplicated Footer Container - Removed from content_layout
-        # The MainWindow status bar already handles this.
-        # Footer status bar — compact, fixed-height, unified typography.
-        # Both labels use identical font-size, weight, and color so neither
-        # appears larger or bolder than the other regardless of Qt's defaults.
+        self._build_status_bar()
+
+    def _build_status_bar(self) -> None:
+        """Footer status bar — compact, fixed-height, unified typography."""
         self._status_bar = QStatusBar()
         self._status_bar.setObjectName("appStatusBar")
         self._status_bar.setSizeGripEnabled(False)
@@ -298,15 +298,13 @@ class MainWindow(QMainWindow):
         """)
         self.setStatusBar(self._status_bar)
 
-        # Left label: live data indicator — anchored with a sidebar-aligned margin.
         self._live_status_lbl = QLabel("●  Live — receiving system data")
         self._live_status_lbl.setStyleSheet(
             "color: #b0b0b0; font-size: 13px; font-weight: 400;"
             "margin-left: 8px; background: transparent;"
         )
-        self._status_bar.addWidget(self._live_status_lbl, 1)  # stretch=1 pushes right label to edge
+        self._status_bar.addWidget(self._live_status_lbl, 1)
 
-        # Right label: serial connection state.
         self._serial_status_lbl = QLabel("🔌  Serial: disconnected")
         self._serial_status_lbl.setStyleSheet(
             "color: #b0b0b0; font-size: 13px; font-weight: 400;"
