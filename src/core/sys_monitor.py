@@ -13,11 +13,20 @@ Supported metrics
 """
 
 import time
+import logging
 from dataclasses import dataclass, asdict
-from typing import Optional
+from typing import Optional, List
+import platform
 
 import psutil
-from PyQt6.QtCore import QThread, pyqtSignal
+try:
+    import pynvml
+    HAS_NVML = True
+except ImportError:
+    HAS_NVML = False
+from PyQt6.QtCore import QObject, pyqtSignal
+
+from src.core.types import SystemStatsDict, ErrorInfo
 
 
 # ---------------------------------------------------------------------------
@@ -29,19 +38,49 @@ class SystemStats:
     """Immutable snapshot of a single polling cycle's resource readings."""
 
     cpu_percent: float          # CPU usage as a percentage (0-100)
+    cpu_cores_percent: List[float] # Usage per core
     ram_percent: float          # RAM usage as a percentage (0-100)
     ram_used_gb: float          # RAM currently in use (GiB)
     ram_total_gb: float         # Total installed RAM (GiB)
+    ram_cached_gb: float        # Cached memory (GiB)
+    ram_buffers_gb: float       # Buffers memory (GiB)
+    swap_percent: float         # Swap usage as a percentage
+    swap_used_gb: float         # Swap currently in use (GiB)
+    swap_total_gb: float        # Total swap space (GiB)
+    net_download_speed: float   # Download speed in MB/s
+    net_upload_speed: float     # Upload speed in MB/s
+    net_total_sent: float       # Total GB sent today (or since boot)
+    net_total_recv: float       # Total GB received today (or since boot)
+    storage_percent: float      # Storage usage percentage of the primary drive
+    storage_used_gb: float      # Storage used in GB
+    storage_total_gb: float     # Storage total in GB
+    storage_free_gb: float      # Storage free in GB
+    disk_read_speed: float      # Disk read speed in MB/s
+    disk_write_speed: float     # Disk write speed in MB/s
     cpu_temp_celsius: float     # CPU package temperature in °C; 0.0 if unavailable
+    gpu_utilization: float      # GPU utilization as a percentage (0-100)
+    uptime_str: str             # Formatted uptime "Xd Xh Xm"
+    process_count: int          # Total number of processes
+    battery_percent: float      # Battery percentage
+    battery_is_plugged: bool    # Whether battery is charging
+    battery_time_left: str      # Battery time remaining
+    cpu_cores_freq: List[float]  # Frequency per core (GHz)
+    cpu_fan_rpm: int            # CPU fan speed (RPM)
+    gpu_name: str               # GPU model name
+    gpu_vram_total_gb: float    # Total VRAM (GB)
+    gpu_vram_used_gb: float     # Used VRAM (GB)
+    gpu_vram_free_gb: float     # Free VRAM (GB)
+    gpu_vram_percent: float     # VRAM utilization percentage
+    gpu_fan_rpm: int            # GPU fan speed (RPM)
 
 
 # ---------------------------------------------------------------------------
-# Worker thread
+# Worker object
 # ---------------------------------------------------------------------------
 
-class SystemMonitorWorker(QThread):
+class SystemMonitorWorker(QObject):
     """
-    Background thread that polls system statistics at a configurable interval.
+    Background worker that polls system statistics at a configurable interval.
 
     Signals
     -------
@@ -51,10 +90,14 @@ class SystemMonitorWorker(QThread):
 
     error_occurred(str)
         Emitted when a non-recoverable error is encountered.
+
+    finished()
+        Emitted when the worker has stopped its main loop.
     """
 
-    stats_ready: pyqtSignal = pyqtSignal(dict)
-    error_occurred: pyqtSignal = pyqtSignal(str)
+    stats_ready: pyqtSignal = pyqtSignal(dict)  # SystemStatsDict
+    error_occurred: pyqtSignal = pyqtSignal(dict)  # ErrorInfo
+    finished: pyqtSignal = pyqtSignal()
 
     def __init__(self, poll_interval_seconds: float = 2.0, parent=None) -> None:
         """
@@ -69,19 +112,30 @@ class SystemMonitorWorker(QThread):
         self._poll_interval = poll_interval_seconds
         self._running = False
 
+        # For network speed calculations
+        self._last_net_io = psutil.net_io_counters()
+        # For disk speed calculations
+        self._last_disk_io = psutil.disk_io_counters()
+        self._last_poll_time = time.time()
+
+        # Initialize NVML
+        self._nvml_initialized = False
+        if HAS_NVML:
+            try:
+                pynvml.nvmlInit()
+                self._nvml_initialized = True
+            except Exception as e:
+                logging.warning(f"Failed to initialize NVML: {e}")
+
     # ------------------------------------------------------------------
-    # Public API
+    # Public Slots
     # ------------------------------------------------------------------
 
     def stop(self) -> None:
         """Signal the polling loop to exit on its next iteration."""
         self._running = False
 
-    # ------------------------------------------------------------------
-    # QThread interface
-    # ------------------------------------------------------------------
-
-    def run(self) -> None:
+    def start_monitoring(self) -> None:
         """Main loop executed in the background thread."""
         self._running = True
 
@@ -93,7 +147,11 @@ class SystemMonitorWorker(QThread):
                 stats = self._collect_stats()
                 self.stats_ready.emit(asdict(stats))
             except Exception as exc:  # pragma: no cover – safety net
-                self.error_occurred.emit(str(exc))
+                self.error_occurred.emit(ErrorInfo(
+                    source="SystemMonitor",
+                    message=str(exc),
+                    timestamp=time.time()
+                ))
 
             # Use a sleep loop instead of a single long sleep so stop() is
             # responsive without requiring a full interval to elapse.
@@ -102,6 +160,15 @@ class SystemMonitorWorker(QThread):
             while self._running and elapsed < self._poll_interval:
                 time.sleep(tick)
                 elapsed += tick
+        
+        # Shutdown NVML
+        if self._nvml_initialized:
+            try:
+                pynvml.nvmlShutdown()
+            except Exception:
+                pass
+                
+        self.finished.emit()
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -109,58 +176,231 @@ class SystemMonitorWorker(QThread):
 
     def _collect_stats(self) -> SystemStats:
         """Sample all metrics and return a populated :class:`SystemStats`."""
+        # CPU
         cpu_pct = psutil.cpu_percent(interval=None)
+        cpu_cores_pct = psutil.cpu_percent(interval=None, percpu=True)
 
+        # RAM & Swap
         vm = psutil.virtual_memory()
         ram_pct = vm.percent
         ram_used_gb = vm.used / (1024 ** 3)
         ram_total_gb = vm.total / (1024 ** 3)
+        
+        # Linux specific memory
+        ram_cached_gb = 0.0
+        ram_buffers_gb = 0.0
+        if platform.system() == "Linux":
+            ram_cached_gb = getattr(vm, 'cached', 0) / (1024 ** 3)
+            ram_buffers_gb = getattr(vm, 'buffers', 0) / (1024 ** 3)
 
-        cpu_temp = self._get_cpu_temperature()
+        swap = psutil.swap_memory()
+        swap_pct = swap.percent
+        swap_used_gb = swap.used / (1024 ** 3)
+        swap_total_gb = swap.total / (1024 ** 3)
+
+        # IO calculations
+        now = time.time()
+        dt = now - self._last_poll_time
+        if dt <= 0:
+            dt = 0.001 # prevent div by zero
+            
+        # Network
+        net_io = psutil.net_io_counters()
+        dl_speed = (net_io.bytes_recv - self._last_net_io.bytes_recv) / dt / (1024 * 1024) # MB/s
+        ul_speed = (net_io.bytes_sent - self._last_net_io.bytes_sent) / dt / (1024 * 1024) # MB/s
+        self._last_net_io = net_io
+
+        # Disk IO
+        disk_io = psutil.disk_io_counters()
+        disk_read_speed = (disk_io.read_bytes - self._last_disk_io.read_bytes) / dt / (1024 * 1024) # MB/s
+        disk_write_speed = (disk_io.write_bytes - self._last_disk_io.write_bytes) / dt / (1024 * 1024) # MB/s
+        self._last_disk_io = disk_io
+        
+        self._last_poll_time = now
+
+        net_total_sent = net_io.bytes_sent / (1024 ** 3) # GB
+        net_total_recv = net_io.bytes_recv / (1024 ** 3) # GB
+
+        # GPU Details
+        gpu_util = 0.0
+        gpu_name = "N/A"
+        gpu_vram_total = 0.0
+        gpu_vram_used = 0.0
+        gpu_vram_free = 0.0
+        gpu_vram_pct = 0.0
+        gpu_fan_rpm = 0
+
+        if self._nvml_initialized:
+            try:
+                handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+                
+                # Utilization
+                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                gpu_util = float(util.gpu)
+                
+                # Name
+                gpu_name = pynvml.nvmlDeviceGetName(handle)
+                if isinstance(gpu_name, bytes):
+                    gpu_name = gpu_name.decode('utf-8')
+                
+                # VRAM
+                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                gpu_vram_total = mem.total / (1024 ** 3)
+                gpu_vram_used = mem.used / (1024 ** 3)
+                gpu_vram_free = mem.free / (1024 ** 3)
+                if gpu_vram_total > 0:
+                    gpu_vram_pct = (gpu_vram_used / gpu_vram_total) * 100
+                
+                # Fan Speed
+                try:
+                    gpu_fan_rpm = pynvml.nvmlDeviceGetFanSpeed(handle)
+                except Exception:
+                    gpu_fan_rpm = 0
+            except Exception:
+                pass
+
+        # Global stats
+        uptime_sec = time.time() - psutil.boot_time()
+        days, rem = divmod(int(uptime_sec), 86400)
+        hours, rem = divmod(rem, 3600)
+        minutes, _ = divmod(rem, 60)
+        uptime_str = f"{days}d {hours}h {minutes}m"
+        
+        process_count = len(psutil.pids())
+        
+        battery = psutil.sensors_battery()
+        bat_percent = 0.0
+        bat_plugged = False
+        bat_time_str = "N/A"
+        if battery:
+            bat_percent = battery.percent
+            bat_plugged = battery.power_plugged
+            if battery.secsleft == psutil.POWER_TIME_UNLIMITED:
+                bat_time_str = "Unlimited"
+            elif battery.secsleft == psutil.POWER_TIME_UNKNOWN:
+                bat_time_str = "Unknown"
+            else:
+                h, m = divmod(battery.secsleft // 60, 60)
+                bat_time_str = f"{h}h {m}m"
+
+        # Frequencies, Fan and Temperature
+        cpu_temp, _ = self._get_cpu_temperatures()
+        
+        cpu_fan_rpm = 0
+        try:
+            fans = psutil.sensors_fans()
+            if fans:
+                # Common labels for CPU fan: 'cpu_fan', 'fan1', etc.
+                # We'll take the first one that seems like a CPU fan or just the first available
+                for fan_label, fan_list in fans.items():
+                    if fan_list:
+                        cpu_fan_rpm = fan_list[0].current
+                        break
+        except Exception:
+            cpu_fan_rpm = 0
+
+        cpu_cores_freq = []
+        try:
+            freqs = psutil.cpu_freq(percpu=True)
+            for f in freqs:
+                # Use current frequency and convert MHz to GHz
+                cpu_cores_freq.append(round(f.current / 1000.0, 2))
+        except Exception:
+            cpu_cores_freq = []
+
+        # Primary drive usage
+        try:
+            storage = psutil.disk_usage('/')
+            storage_pct = storage.percent
+            storage_used = storage.used / (1024 ** 3)
+            storage_total = storage.total / (1024 ** 3)
+            storage_free = storage.free / (1024 ** 3)
+        except Exception:
+            storage_pct = 0.0
+            storage_used = 0.0
+            storage_total = 0.0
+            storage_free = 0.0
 
         return SystemStats(
             cpu_percent=cpu_pct,
+            cpu_cores_percent=cpu_cores_pct,
             ram_percent=ram_pct,
             ram_used_gb=round(ram_used_gb, 2),
             ram_total_gb=round(ram_total_gb, 2),
+            ram_cached_gb=round(ram_cached_gb, 2),
+            ram_buffers_gb=round(ram_buffers_gb, 2),
+            swap_percent=swap_pct,
+            swap_used_gb=round(swap_used_gb, 2),
+            swap_total_gb=round(swap_total_gb, 2),
+            net_download_speed=round(dl_speed, 2),
+            net_upload_speed=round(ul_speed, 2),
+            net_total_sent=round(net_total_sent, 2),
+            net_total_recv=round(net_total_recv, 2),
+            storage_percent=storage_pct,
+            storage_used_gb=round(storage_used, 2),
+            storage_total_gb=round(storage_total, 2),
+            storage_free_gb=round(storage_free, 2),
+            disk_read_speed=round(disk_read_speed, 2),
+            disk_write_speed=round(disk_write_speed, 2),
             cpu_temp_celsius=cpu_temp,
+            gpu_utilization=gpu_util,
+            gpu_name=gpu_name,
+            gpu_vram_total_gb=round(gpu_vram_total, 2),
+            gpu_vram_used_gb=round(gpu_vram_used, 2),
+            gpu_vram_free_gb=round(gpu_vram_free, 2),
+            gpu_vram_percent=round(gpu_vram_pct, 1),
+            gpu_fan_rpm=gpu_fan_rpm,
+            uptime_str=uptime_str,
+            process_count=process_count,
+            battery_percent=bat_percent,
+            battery_is_plugged=bat_plugged,
+            battery_time_left=bat_time_str,
+            cpu_cores_freq=cpu_cores_freq,
+            cpu_fan_rpm=cpu_fan_rpm,
         )
 
     @staticmethod
-    def _get_cpu_temperature() -> float:
+    def _get_cpu_temperatures() -> tuple[float, list[float]]:
         """
-        Attempt to read the CPU package temperature.
+        Attempt to read the CPU package and per-core temperatures.
 
-        Returns 0.0 on any platform where sensor access fails (e.g. Windows
-        without OpenHardwareMonitor, macOS without extra drivers, or Linux
-        without coretemp/acpi module loaded).
+        Returns (package_temp, [core1_temp, core2_temp, ...]).
+        Returns (0.0, []) if unavailable.
         """
         try:
             if not hasattr(psutil, "sensors_temperatures"):
-                # Windows ships psutil without this attribute unless compiled
-                # with the correct optional dependencies.
-                return 0.0
+                return 0.0, []
 
             temps = psutil.sensors_temperatures()
             if not temps:
-                return 0.0
+                return 0.0, []
+
+            package_temp = 0.0
+            core_temps = []
 
             # Priority order for common sensor names across distros / hardware
             priority_keys = ("coretemp", "k10temp", "zenpower", "acpitz", "cpu_thermal")
             for key in priority_keys:
                 if key in temps:
                     entries = temps[key]
-                    # Prefer the "Package id 0" / "Tdie" entry; fall back to first
+                    
+                    # For coretemp, entries usually look like:
+                    # Package id 0, Core 0, Core 1, ...
                     for entry in entries:
                         label = entry.label.lower()
                         if "package" in label or "tdie" in label or "tctl" in label:
-                            return round(entry.current, 1)
-                    # Fall back to the first sensor in the matched group
-                    return round(entries[0].current, 1)
+                            package_temp = round(entry.current, 1)
+                        elif "core" in label:
+                            core_temps.append(round(entry.current, 1))
+                    
+                    if package_temp == 0.0 and entries:
+                         package_temp = round(entries[0].current, 1)
+                    
+                    return package_temp, core_temps
 
             # Use the first available sensor as a last resort
             first_group = next(iter(temps.values()))
-            return round(first_group[0].current, 1)
+            return round(first_group[0].current, 1), []
 
         except Exception:
-            return 0.0
+            return 0.0, []

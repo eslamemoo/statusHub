@@ -18,12 +18,14 @@ Usage
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QFont
 
 from src.ui.main_window import MainWindow
+from src.ui.splash_screen import SplashScreen
 from src.utils.config_manager import ConfigManager
 
 
@@ -86,10 +88,10 @@ QWidget#sidebar {
 }
 
 QLabel#sidebarHeader {
-    background-color: #0c0c14;
+    background-color: transparent;
     color: #4f8ef7;
-    padding-left: 12px;
-    border-bottom: 1px solid #2d2d42;
+    padding-left: 0px;
+    border: none;
     font-size: 15px;
     font-weight: bold;
 }
@@ -109,7 +111,6 @@ QFrame#sidebarSeparator {
 QPushButton#navButton {
     background-color: transparent;
     border: none;
-    border-left: 3px solid transparent;
     color: #6b7280;
     text-align: left;
     padding: 12px 18px;
@@ -123,21 +124,20 @@ QPushButton#navButton:hover {
 
 QPushButton#navButton:checked {
     background-color: #1e1e2a;
-    border-left: 3px solid #4f8ef7;
     color: #4f8ef7;
     font-weight: bold;
 }
 
 /* ── 4. Group boxes ─────────────────────────────────────────────────── */
 QGroupBox {
-    background-color: #1e1e2a;
+    background-color: transparent;
     border: 1px solid #2d2d42;
     border-radius: 12px;
     margin-top: 16px;
     padding: 16px 12px 12px 12px;
     font-weight: bold;
-    font-size: 12px;
-    color: #6b7280;
+    font-size: 18px;
+    color: #ffffff;
 }
 
 QGroupBox::title {
@@ -145,9 +145,10 @@ QGroupBox::title {
     subcontrol-position: top left;
     left: 14px;
     padding: 0 8px;
-    color: #6b7280;
-    font-size: 11px;
-    font-weight: 600;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: transparent;
 }
 
 /* ── 5. Metric cards ────────────────────────────────────────────────── */
@@ -413,8 +414,12 @@ def main() -> int:
     # Apply the global dark stylesheet.
     app.setStyleSheet(DARK_STYLESHEET)
 
-    window = MainWindow(config=config)
-    window.show()
+    # Show Splash Screen
+    splash = SplashScreen()
+    splash.show()
+    
+    # Initialize MainWindow with splash screen reference
+    window = MainWindow(config=config, splash=splash)
 
     exit_code = app.exec()
     logger.info("StatusHub exited with code %d.", exit_code)

@@ -21,11 +21,14 @@ weather.interval  : int  – Poll interval in seconds (default: 600)
 """
 
 import time
+import logging
 from dataclasses import dataclass, asdict
 from typing import Optional
 
 import requests
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
+
+from src.core.types import WeatherDataDict, ErrorInfo
 
 
 # ---------------------------------------------------------------------------
@@ -47,12 +50,12 @@ class WeatherData:
 
 
 # ---------------------------------------------------------------------------
-# Worker thread
+# Worker object
 # ---------------------------------------------------------------------------
 
-class WeatherFetcherWorker(QThread):
+class WeatherFetcherWorker(QObject):
     """
-    Background thread that periodically fetches weather from OpenWeatherMap.
+    Background worker that periodically fetches weather from OpenWeatherMap.
 
     Signals
     -------
@@ -62,10 +65,14 @@ class WeatherFetcherWorker(QThread):
 
     fetch_error(str)
         Emitted when the HTTP request fails or the response is unexpected.
+
+    finished()
+        Emitted when the worker has stopped its main loop.
     """
 
-    weather_ready: pyqtSignal = pyqtSignal(dict)
-    fetch_error: pyqtSignal = pyqtSignal(str)
+    weather_ready: pyqtSignal = pyqtSignal(dict)  # WeatherDataDict
+    fetch_error: pyqtSignal = pyqtSignal(dict)  # ErrorInfo
+    finished: pyqtSignal = pyqtSignal()
 
     _OWM_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
     _DEFAULT_TIMEOUT = 10  # seconds
@@ -84,7 +91,7 @@ class WeatherFetcherWorker(QThread):
         self._running = False
 
     # ------------------------------------------------------------------
-    # Public API
+    # Public Slots
     # ------------------------------------------------------------------
 
     def update_config(self, api_key: str, city: str) -> None:
@@ -96,11 +103,7 @@ class WeatherFetcherWorker(QThread):
         """Signal the polling loop to exit."""
         self._running = False
 
-    # ------------------------------------------------------------------
-    # QThread interface
-    # ------------------------------------------------------------------
-
-    def run(self) -> None:
+    def start_fetching(self) -> None:
         """Main loop: fetch immediately, then wait for the next interval."""
         self._running = True
 
@@ -113,6 +116,8 @@ class WeatherFetcherWorker(QThread):
             while self._running and elapsed < self._poll_interval:
                 time.sleep(tick)
                 elapsed += tick
+        
+        self.finished.emit()
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -128,9 +133,17 @@ class WeatherFetcherWorker(QThread):
             payload = self._call_api()
             self.weather_ready.emit(asdict(payload))
         except requests.exceptions.RequestException as exc:
-            self.fetch_error.emit(f"Network error: {exc}")
+            self.fetch_error.emit(ErrorInfo(
+                source="WeatherFetcher",
+                message=f"Network error: {exc}",
+                timestamp=time.time()
+            ))
         except (KeyError, ValueError) as exc:
-            self.fetch_error.emit(f"Unexpected API response: {exc}")
+            self.fetch_error.emit(ErrorInfo(
+                source="WeatherFetcher",
+                message=f"Unexpected API response: {exc}",
+                timestamp=time.time()
+            ))
 
     def _call_api(self) -> WeatherData:
         """
