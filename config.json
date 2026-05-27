@@ -3,7 +3,7 @@
         "theme": "dark",
         "language": "en",
         "window_width": 1920,
-        "window_height": 1010
+        "window_height": 1042
     },
     "monitor": {
         "poll_interval_seconds": 2.0

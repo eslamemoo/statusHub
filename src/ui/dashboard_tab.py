@@ -51,7 +51,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QGroupBox,
     QSizePolicy,
-    QSpacerItem,
     QScrollArea,
     QProgressBar,
     QFrame,
@@ -166,7 +165,6 @@ class GaugeCard(QWidget):
 
         self.setObjectName("metricCard")
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.setMinimumHeight(150) # Reduced from 200 to be more flexible
 
     # ------------------------------------------------------------------
     # Public API
@@ -199,31 +197,39 @@ class GaugeCard(QWidget):
 
 class ResponsiveGaugeContainer(QWidget):
     """
-    A container for 4 circular gauges that dynamically changes its grid layout
-    based on the available width.
-    - Large (> 1100px): 1 row, 4 columns
-    - Medium (> 650px): 2 rows, 2 columns
-    - Small (<= 650px): 4 rows, 1 column
+    A container for 4 circular gauges that dynamically switches its grid
+    layout based on available width.
+
+    States
+    ------
+    1 — Large  (width > 1100 px): 1 row × 4 columns
+    2 — Medium (width >  650 px): 2 rows × 2 columns
+    3 — Small  (width <=  650 px): 4 rows × 1 column
+
+    Height is determined entirely by the natural size hints of the contained
+    GaugeCard widgets and the stretch factors set on the master layout — no
+    hardcoded pixel heights are imposed here.
     """
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._layout = QGridLayout(self)
-        self._layout.setSpacing(20)
+        self._layout.setSpacing(16)
         self._layout.setContentsMargins(5, 5, 5, 5)
         self._widgets: list[QWidget] = []
-        self._current_state: int = 0  # 0: None, 1: Large, 2: Medium, 3: Small
+        self._current_state: int = 0  # 0: uninitialised, 1: large, 2: medium, 3: small
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
     def add_widget(self, widget: QWidget) -> None:
-        """Add a widget to be managed by the responsive grid."""
+        """Append *widget* to the managed set and trigger a grid rebuild."""
         self._widgets.append(widget)
-        self._update_grid(force=True)
+        self._update_grid()
 
     def resizeEvent(self, event) -> None:  # noqa: N802
-        """Handle resize events to switch between grid states."""
+        """Switch the grid state whenever the available width crosses a threshold."""
         super().resizeEvent(event)
         width = event.size().width()
 
-        new_state = 1
         if width > 1100:
             new_state = 1
         elif width > 650:
@@ -235,28 +241,45 @@ class ResponsiveGaugeContainer(QWidget):
             self._current_state = new_state
             self._update_grid()
 
-    def _update_grid(self, force: bool = False) -> None:
-        """Clear and rebuild the grid layout based on the current state."""
+    def _update_grid(self) -> None:
+        """Rebuild the QGridLayout positions for the current state."""
         if not self._widgets:
             return
 
-        # Clear existing items from layout
+        # Detach all widgets from the layout without reparenting them.
         while self._layout.count():
             item = self._layout.takeAt(0)
             if item.widget():
                 item.widget().setParent(self)
 
-        # Re-add widgets based on state
-        if self._current_state == 1:  # 1x4
+        # Clear any previously set row/column stretch or minimum sizes so
+        # the new configuration starts from a clean slate.
+        for r in range(4):
+            self._layout.setRowStretch(r, 0)
+            self._layout.setRowMinimumHeight(r, 0)
+        for c in range(4):
+            self._layout.setColumnStretch(c, 0)
+
+        if self._current_state == 1:        # 1 row × 4 columns
             for i, widget in enumerate(self._widgets):
                 self._layout.addWidget(widget, 0, i)
-        elif self._current_state == 2:  # 2x2
+                self._layout.setColumnStretch(i, 1)
+            self._layout.setRowStretch(0, 1)
+
+        elif self._current_state == 2:      # 2 rows × 2 columns
             for i, widget in enumerate(self._widgets):
-                row, col = divmod(i, 2)
-                self._layout.addWidget(widget, row, col)
-        else:  # 4x1 (State 3)
+                r, c = divmod(i, 2)
+                self._layout.addWidget(widget, r, c)
+            self._layout.setRowStretch(0, 1)
+            self._layout.setRowStretch(1, 1)
+            self._layout.setColumnStretch(0, 1)
+            self._layout.setColumnStretch(1, 1)
+
+        else:                               # 4 rows × 1 column
             for i, widget in enumerate(self._widgets):
                 self._layout.addWidget(widget, i, 0)
+                self._layout.setRowStretch(i, 1)
+            self._layout.setColumnStretch(0, 1)
 
 
 # ---------------------------------------------------------------------------
@@ -427,6 +450,8 @@ class DetailCard(QFrame):
             QLabel {
                 color: #ffffff;
                 background: transparent;
+                font-size: 14px;
+                font-weight: bold;
             }
             QLabel#cardTitle {
                 font-size: 16px;
@@ -476,31 +501,35 @@ class CPUDetailCard(DetailCard):
         self.main_layout.addLayout(self.grid)
         self.bars = []
         
-        # Bottom info: Active Processes & Fan Speed
+        # Bottom info: Active Processes and Fan Speed on separate rows
+        # to prevent horizontal crowding when the card is narrow.
         self.main_layout.addSpacing(12)
-        
-        self.footer_layout = QHBoxLayout()
-        
-        # Task 3: Add Icons before "Active Processes" and "Fan Speed"
+
+        proc_row = QHBoxLayout()
+        proc_row.setSpacing(6)
         self.proc_icon = QLabel()
-        self.proc_icon.setPixmap(qta.icon("mdi.text-box-multiple-outline", color="#a0a0a0").pixmap(16, 16))
-        self.footer_layout.addWidget(self.proc_icon)
-        
+        self.proc_icon.setPixmap(
+            qta.icon("mdi.text-box-multiple-outline", color="#a0a0a0").pixmap(16, 16)
+        )
         self.proc_lbl = QLabel("Active Processes: —")
         self.proc_lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: #ffffff;")
-        self.footer_layout.addWidget(self.proc_lbl)
-        
-        self.footer_layout.addStretch()
-        
+        self.proc_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        proc_row.addWidget(self.proc_icon)
+        proc_row.addWidget(self.proc_lbl)
+        proc_row.addStretch()
+        self.main_layout.addLayout(proc_row)
+
+        fan_row = QHBoxLayout()
+        fan_row.setSpacing(6)
         self.fan_icon = QLabel()
         self.fan_icon.setPixmap(qta.icon("mdi.fan", color="#ffffff").pixmap(16, 16))
-        self.footer_layout.addWidget(self.fan_icon)
-        
         self.fan_lbl = QLabel("Fan Speed: — RPM")
         self.fan_lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: #ffffff;")
-        self.footer_layout.addWidget(self.fan_lbl)
-        
-        self.main_layout.addLayout(self.footer_layout)
+        self.fan_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        fan_row.addWidget(self.fan_icon)
+        fan_row.addWidget(self.fan_lbl)
+        fan_row.addStretch()
+        self.main_layout.addLayout(fan_row)
 
     def update_stats(self, stats: SystemStatsDict):
         cores_pct = stats.get("cpu_cores_percent", [])
@@ -668,15 +697,24 @@ class RAMDetailCard(DetailCard):
 class GPUDetailCard(DetailCard):
     def __init__(self, parent=None):
         super().__init__("GPU DETAILS", parent)
-        
+
         self.model_lbl = QLabel("Model: —")
         self.model_lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: #a855f7; margin-bottom: 5px;")
-        
+
+        # VRAM widgets — shown only when a dedicated NVIDIA GPU is active
         self.vram_lbl = QLabel("VRAM Usage:")
         self.vram_bar = QProgressBar()
         self.vram_info = QLabel("— / — GB (—%)")
-        
-        # Task 3: Add icon before "GPU Fan Speed"
+
+        # Fallback label shown when integrated GPU is detected (no dedicated VRAM)
+        self.shared_mem_lbl = QLabel("Dynamic Shared Memory")
+        self.shared_mem_lbl.setStyleSheet(
+            "font-size: 13px; font-weight: bold; color: #6b7280;"
+            "font-style: italic; padding: 6px 0;"
+        )
+        self.shared_mem_lbl.setVisible(False)
+
+        # Fan speed row with material icon
         fan_layout = QHBoxLayout()
         fan_layout.setSpacing(5)
         self.fan_icon = QLabel()
@@ -686,26 +724,46 @@ class GPUDetailCard(DetailCard):
         fan_layout.addWidget(self.fan_icon)
         fan_layout.addWidget(self.fan_lbl)
         fan_layout.addStretch()
-        
+
         self.main_layout.addWidget(self.model_lbl)
         self.main_layout.addWidget(self.vram_lbl)
         self.main_layout.addWidget(self.vram_bar)
         self.main_layout.addWidget(self.vram_info)
+        self.main_layout.addWidget(self.shared_mem_lbl)
         self.main_layout.addLayout(fan_layout)
 
     def update_stats(self, stats: SystemStatsDict):
-        self.model_lbl.setText(f"Model: {stats.get('gpu_name', 'N/A')}")
-        
-        vram_pct = stats.get('gpu_vram_percent', 0.0)
-        total = stats.get('gpu_vram_total_gb', 0.0)
-        used = stats.get('gpu_vram_used_gb', 0.0)
-        
-        self.vram_bar.setValue(int(vram_pct))
-        self.vram_bar.setStyleSheet(f"QProgressBar::chunk {{ background-color: {get_dynamic_color(vram_pct)}; }}")
-        self.vram_info.setText(f"{used:.2f} / {total:.2f} GB ({vram_pct}%)")
-        
-        fan_rpm = stats.get('gpu_fan_rpm', 0)
-        self.fan_lbl.setText(f"GPU Fan Speed: {fan_rpm} RPM" if fan_rpm > 0 else "GPU Fan Speed: N/A")
+        gpu_name = stats.get("gpu_name", "N/A")
+        self.model_lbl.setText(f"Active GPU: {gpu_name}")
+
+        is_dedicated = stats.get("gpu_is_dedicated", False)
+        vram_pct = stats.get("gpu_vram_percent", 0.0)
+        total = stats.get("gpu_vram_total_gb", 0.0)
+        used = stats.get("gpu_vram_used_gb", 0.0)
+
+        if is_dedicated and total > 0:
+            # Dedicated NVIDIA GPU — show full VRAM bar
+            self.vram_lbl.setVisible(True)
+            self.vram_bar.setVisible(True)
+            self.vram_info.setVisible(True)
+            self.shared_mem_lbl.setVisible(False)
+
+            self.vram_bar.setValue(int(vram_pct))
+            self.vram_bar.setStyleSheet(
+                f"QProgressBar::chunk {{ background-color: {get_dynamic_color(vram_pct)}; }}"
+            )
+            self.vram_info.setText(f"{used:.2f} / {total:.2f} GB ({vram_pct}%)")
+        else:
+            # Integrated or suspended GPU — hide VRAM bar, show shared memory note
+            self.vram_lbl.setVisible(False)
+            self.vram_bar.setVisible(False)
+            self.vram_info.setVisible(False)
+            self.shared_mem_lbl.setVisible(True)
+
+        fan_rpm = stats.get("gpu_fan_rpm", 0)
+        self.fan_lbl.setText(
+            f"GPU Fan Speed: {fan_rpm} RPM" if fan_rpm > 0 else "GPU Fan Speed: N/A"
+        )
 
 class BatteryUptimeCard(DetailCard):
     def __init__(self, parent=None):
@@ -713,13 +771,15 @@ class BatteryUptimeCard(DetailCard):
         
         # Battery Section
         self.bat_lbl = QLabel("Battery Level:")
+        self.bat_lbl.setStyleSheet("font-size: 14px; font-weight: bold; color: #ffffff;")
         self.bat_bar = QProgressBar()
         self.bat_status = QLabel("—% [—]")
+        self.bat_status.setStyleSheet("font-size: 14px; font-weight: bold; color: #ffffff;")
         
         # Uptime Section
         self.uptime_header = QLabel("System Uptime:")
         self.uptime_header.setStyleSheet("margin-top: 15px; font-size: 14px; font-weight: bold; color: #ffffff;")
-        self.uptime_val = QLabel("— Days, — Hours")
+        self.uptime_val = QLabel("— Days, — Hours, — Minutes")
         self.uptime_val.setStyleSheet("font-size: 18px; font-weight: bold; color: #3fb950;")
         self.uptime_val.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
@@ -742,12 +802,13 @@ class BatteryUptimeCard(DetailCard):
         self.bat_status.setText(f"{bat_pct:.0f}% [{status_text}]")
         
         uptime = stats.get('uptime_str', '—')
-        # Format "Xd Xh Xm" to a more friendly "X Days, X Hours"
+        # Parse "Xd Xh Xm" into the friendly "X Days, X Hours, X Minutes" format.
         try:
             parts = uptime.split(' ')
             d = parts[0].replace('d', ' Days')
             h = parts[1].replace('h', ' Hours')
-            self.uptime_val.setText(f"{d}, {h}")
+            m = parts[2].replace('m', ' Minutes')
+            self.uptime_val.setText(f"{d}, {h}, {m}")
         except Exception:
             self.uptime_val.setText(uptime)
 
@@ -900,62 +961,75 @@ class DashboardTab(QWidget):
         root.setContentsMargins(12, 12, 12, 12)
         root.setSpacing(12)
 
-        # The ENTIRE DashboardTab must consist of a SINGLE QScrollArea.
+        # The ENTIRE DashboardTab is wrapped in a single QScrollArea so that
+        # content remains reachable on small screens.
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
+        # Never show a horizontal scrollbar — content must reflow instead.
+        self.scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        # Keep vertical scrolling available so all 6 cards remain reachable
+        # when the window height is limited.
+        self.scroll_area.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
         self.scroll_area.setStyleSheet("background-color: transparent; border: none;")
         self.scroll_area.viewport().setStyleSheet("background-color: transparent;")
-        
-        # Master widget inside the scroll area
+
+        # Master widget inside the scroll area.
         master_widget = QWidget()
         master_widget.setStyleSheet("background-color: transparent;")
         master_layout = QVBoxLayout(master_widget)
         master_layout.setContentsMargins(10, 10, 10, 10)
-        master_layout.setSpacing(12) # Reduced from 20 to use explicit spacing below gauges
+        master_layout.setSpacing(0)  # Inter-section spacing controlled via stretch only.
 
-        # 1. Top Section (Quick Overview)
+        # ── 1. Top gauge section ──────────────────────────────────────────
         self.resources_group = self._build_resources_group()
-        # Set QSizePolicy to Expanding so it can grow if needed
-        self.resources_group.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        # Ensure it has a minimum height to prevent clipping
-        self.resources_group.setMinimumHeight(280)
-        master_layout.addWidget(self.resources_group)
-        
-        # Task 1: Fix Top Gauges Vertical Clipping & Add Breathing Room
-        master_layout.addSpacerItem(QSpacerItem(20, 30, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))
+        # Preferred vertically: takes its natural size from child widgets,
+        # never forces extra blank space, and yields to the detail cards.
+        self.resources_group.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Preferred,
+        )
+        # Stretch 1 — gauges receive 1 share of the available free space.
+        master_layout.addWidget(self.resources_group, 1)
 
-        # 2. Bottom Section (Detailed Drill-down)
+        # Fixed 15 px breathing gap between gauges and cards.
+        master_layout.addSpacing(15)
+
+        # ── 2. Bottom detailed-cards section ────────────────────────────
         detail_container = QWidget()
         detail_container.setStyleSheet("background-color: transparent;")
-        
-        # Grid for detailed cards with equal height rows
+
         self.detail_grid = QGridLayout(detail_container)
         self.detail_grid.setSpacing(20)
         self.detail_grid.setContentsMargins(0, 0, 0, 0)
-        
-        # Add Detailed Cards
-        self.cpu_card = CPUDetailCard()
-        self.ram_card = RAMDetailCard()
-        self.gpu_card = GPUDetailCard()
-        self.bat_card = BatteryUptimeCard()
-        self.net_card = NetworkDetailCard()
+
+        # Detailed metric cards.
+        self.cpu_card     = CPUDetailCard()
+        self.ram_card     = RAMDetailCard()
+        self.gpu_card     = GPUDetailCard()
+        self.bat_card     = BatteryUptimeCard()
+        self.net_card     = NetworkDetailCard()
         self.storage_card = StorageDetailCard()
-        
-        # Arrange in 2 columns
-        self.detail_grid.addWidget(self.cpu_card, 0, 0)
-        self.detail_grid.addWidget(self.ram_card, 0, 1)
-        self.detail_grid.addWidget(self.gpu_card, 1, 0)
-        self.detail_grid.addWidget(self.bat_card, 1, 1)
-        self.detail_grid.addWidget(self.net_card, 2, 0)
+
+        # 2-column arrangement, 3 rows.
+        self.detail_grid.addWidget(self.cpu_card,     0, 0)
+        self.detail_grid.addWidget(self.ram_card,     0, 1)
+        self.detail_grid.addWidget(self.gpu_card,     1, 0)
+        self.detail_grid.addWidget(self.bat_card,     1, 1)
+        self.detail_grid.addWidget(self.net_card,     2, 0)
         self.detail_grid.addWidget(self.storage_card, 2, 1)
-        
-        # Force equal row stretching
+
+        # Equal vertical stretch for all three card rows.
         self.detail_grid.setRowStretch(0, 1)
         self.detail_grid.setRowStretch(1, 1)
         self.detail_grid.setRowStretch(2, 1)
-        
-        master_layout.addWidget(detail_container)
-        
+
+        # Stretch 3 — detail cards receive 3 shares, so gauges:cards = 1:3.
+        master_layout.addWidget(detail_container, 3)
+
         self.scroll_area.setWidget(master_widget)
         root.addWidget(self.scroll_area)
 

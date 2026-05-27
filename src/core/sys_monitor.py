@@ -14,6 +14,7 @@ Supported metrics
 
 import time
 import logging
+import subprocess
 from dataclasses import dataclass, asdict
 from typing import Optional, List
 import platform
@@ -72,6 +73,7 @@ class SystemStats:
     gpu_vram_free_gb: float     # Free VRAM (GB)
     gpu_vram_percent: float     # VRAM utilization percentage
     gpu_fan_rpm: int            # GPU fan speed (RPM)
+    gpu_is_dedicated: bool      # True when an active NVIDIA GPU is queried via NVML
 
 
 # ---------------------------------------------------------------------------
@@ -221,43 +223,8 @@ class SystemMonitorWorker(QObject):
         net_total_sent = net_io.bytes_sent / (1024 ** 3) # GB
         net_total_recv = net_io.bytes_recv / (1024 ** 3) # GB
 
-        # GPU Details
-        gpu_util = 0.0
-        gpu_name = "N/A"
-        gpu_vram_total = 0.0
-        gpu_vram_used = 0.0
-        gpu_vram_free = 0.0
-        gpu_vram_pct = 0.0
-        gpu_fan_rpm = 0
-
-        if self._nvml_initialized:
-            try:
-                handle = pynvml.nvmlDeviceGetHandleByIndex(0)
-                
-                # Utilization
-                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                gpu_util = float(util.gpu)
-                
-                # Name
-                gpu_name = pynvml.nvmlDeviceGetName(handle)
-                if isinstance(gpu_name, bytes):
-                    gpu_name = gpu_name.decode('utf-8')
-                
-                # VRAM
-                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                gpu_vram_total = mem.total / (1024 ** 3)
-                gpu_vram_used = mem.used / (1024 ** 3)
-                gpu_vram_free = mem.free / (1024 ** 3)
-                if gpu_vram_total > 0:
-                    gpu_vram_pct = (gpu_vram_used / gpu_vram_total) * 100
-                
-                # Fan Speed
-                try:
-                    gpu_fan_rpm = pynvml.nvmlDeviceGetFanSpeed(handle)
-                except Exception:
-                    gpu_fan_rpm = 0
-            except Exception:
-                pass
+        # GPU Details — two-tier hybrid detection
+        gpu_data = self._collect_gpu_data()
 
         # Global stats
         uptime_sec = time.time() - psutil.boot_time()
@@ -343,13 +310,14 @@ class SystemMonitorWorker(QObject):
             disk_read_speed=round(disk_read_speed, 2),
             disk_write_speed=round(disk_write_speed, 2),
             cpu_temp_celsius=cpu_temp,
-            gpu_utilization=gpu_util,
-            gpu_name=gpu_name,
-            gpu_vram_total_gb=round(gpu_vram_total, 2),
-            gpu_vram_used_gb=round(gpu_vram_used, 2),
-            gpu_vram_free_gb=round(gpu_vram_free, 2),
-            gpu_vram_percent=round(gpu_vram_pct, 1),
-            gpu_fan_rpm=gpu_fan_rpm,
+            gpu_utilization=gpu_data["gpu_utilization"],
+            gpu_name=gpu_data["gpu_name"],
+            gpu_vram_total_gb=gpu_data["gpu_vram_total_gb"],
+            gpu_vram_used_gb=gpu_data["gpu_vram_used_gb"],
+            gpu_vram_free_gb=gpu_data["gpu_vram_free_gb"],
+            gpu_vram_percent=gpu_data["gpu_vram_percent"],
+            gpu_fan_rpm=gpu_data["gpu_fan_rpm"],
+            gpu_is_dedicated=gpu_data["gpu_is_dedicated"],
             uptime_str=uptime_str,
             process_count=process_count,
             battery_percent=bat_percent,
@@ -358,6 +326,111 @@ class SystemMonitorWorker(QObject):
             cpu_cores_freq=cpu_cores_freq,
             cpu_fan_rpm=cpu_fan_rpm,
         )
+
+    # ------------------------------------------------------------------
+    # GPU data collection — two-tier hybrid strategy
+    # ------------------------------------------------------------------
+
+    def _collect_gpu_data(self) -> dict:
+        """
+        Collect GPU metrics using a two-tier fallback strategy.
+
+        Tier 1 — NVIDIA via pynvml:
+            Attempt a full NVML query (utilization, VRAM, fan speed, model name).
+            On any exception (GPU suspended / driver unavailable), fall through
+            to Tier 2 rather than returning empty data.
+
+        Tier 2 — Linux lspci fallback:
+            Execute ``lspci -mm`` and parse VGA / 3D class entries to extract
+            the active graphics controller name (e.g. Intel Iris Xe Graphics).
+            All numeric fields default to 0.0 to prevent UI crashes.
+
+        Returns
+        -------
+        dict
+            Keys: gpu_name, gpu_utilization, gpu_vram_total_gb,
+                  gpu_vram_used_gb, gpu_vram_free_gb, gpu_vram_percent,
+                  gpu_fan_rpm, gpu_is_dedicated.
+        """
+        result = {
+            "gpu_name": "N/A",
+            "gpu_utilization": 0.0,
+            "gpu_vram_total_gb": 0.0,
+            "gpu_vram_used_gb": 0.0,
+            "gpu_vram_free_gb": 0.0,
+            "gpu_vram_percent": 0.0,
+            "gpu_fan_rpm": 0,
+            "gpu_is_dedicated": False,
+        }
+
+        # ── Tier 1: NVIDIA NVML ──────────────────────────────────────────
+        if self._nvml_initialized:
+            try:
+                handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+
+                # Utilization percentage
+                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                result["gpu_utilization"] = float(util.gpu)
+
+                # Model name (bytes on older pynvml versions)
+                name = pynvml.nvmlDeviceGetName(handle)
+                if isinstance(name, bytes):
+                    name = name.decode("utf-8")
+                result["gpu_name"] = name
+
+                # VRAM — convert bytes to GB
+                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                total_gb = mem.total / (1024 ** 3)
+                used_gb = mem.used / (1024 ** 3)
+                free_gb = mem.free / (1024 ** 3)
+                result["gpu_vram_total_gb"] = round(total_gb, 2)
+                result["gpu_vram_used_gb"] = round(used_gb, 2)
+                result["gpu_vram_free_gb"] = round(free_gb, 2)
+                if total_gb > 0:
+                    result["gpu_vram_percent"] = round((used_gb / total_gb) * 100, 1)
+
+                # Fan speed (not available on all NVIDIA cards)
+                try:
+                    result["gpu_fan_rpm"] = pynvml.nvmlDeviceGetFanSpeed(handle)
+                except Exception:
+                    result["gpu_fan_rpm"] = 0
+
+                result["gpu_is_dedicated"] = True
+                return result
+
+            except Exception as nvml_err:
+                # GPU is likely suspended (D3cold) — fall through to Tier 2
+                logging.debug("NVML query failed (%s); falling back to lspci.", nvml_err)
+
+        # ── Tier 2: Linux lspci fallback ─────────────────────────────────
+        if platform.system() == "Linux":
+            try:
+                proc = subprocess.run(
+                    ["lspci", "-mm"],
+                    capture_output=True,
+                    text=True,
+                    timeout=3,
+                )
+                for line in proc.stdout.splitlines():
+                    lower = line.lower()
+                    # Match VGA compatible controller or 3D controller class entries
+                    if "vga" in lower or "3d" in lower or "display" in lower:
+                        # lspci -mm format: "<slot> "<class>" "<vendor>" "<device>" ..."
+                        # Split on '"' to extract quoted fields
+                        parts = [p.strip() for p in line.split('"') if p.strip()]
+                        if len(parts) >= 3:
+                            # parts[0] = slot, parts[1] = class, parts[2] = vendor,
+                            # parts[3] = device (model name)
+                            vendor = parts[2] if len(parts) > 2 else ""
+                            device = parts[3] if len(parts) > 3 else ""
+                            gpu_name = f"{vendor} {device}".strip()
+                            if gpu_name:
+                                result["gpu_name"] = gpu_name
+                                break
+            except Exception as lspci_err:
+                logging.debug("lspci fallback failed: %s", lspci_err)
+
+        return result
 
     @staticmethod
     def _get_cpu_temperatures() -> tuple[float, list[float]]:

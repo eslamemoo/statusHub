@@ -37,6 +37,7 @@ class SystemStatsDict(TypedDict):
     gpu_vram_free_gb: float
     gpu_vram_percent: float
     gpu_fan_rpm: int
+    gpu_is_dedicated: bool   # True when an active NVIDIA GPU is detected via NVML
 
 class WeatherDataDict(TypedDict):
     """Type definition for the weather data dictionary payload."""

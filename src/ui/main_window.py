@@ -144,7 +144,13 @@ class MainWindow(QMainWindow):
         self._splash = splash
         self._is_collapsed = False
         self._sidebar_animation = None
-        
+
+        # Tracks whether the sidebar was collapsed automatically by the
+        # responsive resize logic (as opposed to a manual user toggle).
+        # Keeping this separate from _is_collapsed prevents the auto-collapse
+        # from fighting user-initiated expand/collapse actions.
+        self._sidebar_auto_collapsed = False
+
         # Hybrid initialization flags
         self._min_time_elapsed = False
         self._first_data_received = False
@@ -219,7 +225,10 @@ class MainWindow(QMainWindow):
     def _build_ui(self) -> None:
         """Assemble the main window layout: sidebar + stacked content area."""
         self.setWindowTitle(f"{self.APP_NAME}  —  Control Center  v{self.APP_VERSION}")
-        self.setMinimumSize(1000, 650)
+        # Hard minimum: 840 px wide ensures the collapsed mini-sidebar (65 px)
+        # plus the 2-column detail-card layout (≈775 px of content space) all
+        # render fully with zero right-edge clipping at the narrowest allowed size.
+        self.setMinimumSize(840, 550)
 
         # Restore last window size from config
         w = self._config.get("app.window_width", 1200)
@@ -263,37 +272,56 @@ class MainWindow(QMainWindow):
         # Pin "Live" status to the bottom of the main content
         # Task 2: Completely Purge Duplicated Footer Container - Removed from content_layout
         # The MainWindow status bar already handles this.
-
-        # Status bar
+        # Footer status bar — compact, fixed-height, unified typography.
+        # Both labels use identical font-size, weight, and color so neither
+        # appears larger or bolder than the other regardless of Qt's defaults.
         self._status_bar = QStatusBar()
         self._status_bar.setObjectName("appStatusBar")
+        self._status_bar.setSizeGripEnabled(False)
         self._status_bar.setStyleSheet("""
-            QStatusBar { 
-                background: transparent; 
-                border: none; 
-                color: #c0c0c0;
-                min-height: 35px;
+            QStatusBar {
+                background: transparent;
+                border-top: 1px solid #2a2a3e;
+                min-height: 28px;
+                max-height: 28px;
             }
-            QStatusBar::item { 
-                border: none; 
+            QStatusBar::item {
+                border: none;
             }
             QLabel {
-                color: #c0c0c0;
-                font-size: 14px;
-                font-weight: 500;
-                padding: 4px 8px;
+                color: #b0b0b0;
+                font-size: 13px;
+                font-weight: 400;
+                padding: 0px;
+                background: transparent;
             }
         """)
         self.setStatusBar(self._status_bar)
+
+        # Left label: live data indicator — anchored with a sidebar-aligned margin.
+        self._live_status_lbl = QLabel("●  Live — receiving system data")
+        self._live_status_lbl.setStyleSheet(
+            "color: #b0b0b0; font-size: 13px; font-weight: 400;"
+            "margin-left: 8px; background: transparent;"
+        )
+        self._status_bar.addWidget(self._live_status_lbl, 1)  # stretch=1 pushes right label to edge
+
+        # Right label: serial connection state.
         self._serial_status_lbl = QLabel("🔌  Serial: disconnected")
+        self._serial_status_lbl.setStyleSheet(
+            "color: #b0b0b0; font-size: 13px; font-weight: 400;"
+            "margin-right: 8px; background: transparent;"
+        )
         self._status_bar.addPermanentWidget(self._serial_status_lbl)
-        self._status_bar.showMessage("Live - receiving system data")
 
     def _build_sidebar(self) -> QWidget:
         """Build the left navigation sidebar."""
         self._sidebar = QWidget()
         self._sidebar.setObjectName("sidebar")
-        self._sidebar.setFixedWidth(220)
+        # Use explicit min/max instead of setFixedWidth so the slide animation
+        # can freely adjust both constraints without fighting a fixed size.
+        self._sidebar.setMinimumWidth(220)
+        self._sidebar.setMaximumWidth(220)
 
         layout = QVBoxLayout(self._sidebar)
         layout.setContentsMargins(0, 15, 0, 8)
@@ -314,7 +342,7 @@ class MainWindow(QMainWindow):
         self._toggle_btn.setFixedSize(55, 50)
         self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._toggle_btn.setStyleSheet("border: none; background: transparent;")
-        self._toggle_btn.clicked.connect(lambda: self._animate_sidebar(not self._is_collapsed))
+        self._toggle_btn.clicked.connect(self._on_toggle_btn_clicked)
         header_layout.addWidget(self._toggle_btn)
 
         # App logo / header label
@@ -391,16 +419,54 @@ class MainWindow(QMainWindow):
         
         self._sidebar_animation.start()
 
+    def _on_toggle_btn_clicked(self) -> None:
+        """
+        Handle a manual hamburger-button click.
+
+        When the user explicitly expands the sidebar at a width that would
+        normally keep it collapsed, clear the auto-collapse flag so the
+        resize logic does not immediately re-collapse it.
+        When the user manually collapses it, mark it as a manual collapse so
+        the resize logic does not try to re-expand it at wide widths.
+        """
+        target_collapsed = not self._is_collapsed
+
+        if not target_collapsed:
+            # User is manually expanding — clear the auto flag so resizeEvent
+            # does not override this action until the window goes narrow again.
+            self._sidebar_auto_collapsed = False
+
+        self._animate_sidebar(target_collapsed)
+
     def resizeEvent(self, event: QResizeEvent) -> None:
-        """Handle responsive sidebar state based on window width."""
+        """
+        Automatically collapse or expand the sidebar based on the window width.
+
+        Two separate thresholds create a hysteresis band that prevents rapid
+        oscillation when the window is resized near the boundary:
+
+        - Collapse trigger : width drops below 850 px
+        - Expand  trigger  : width rises above 900 px
+
+        The auto flag (``_sidebar_auto_collapsed``) is kept entirely separate
+        from the manual toggle flag (``_is_collapsed``) so that user-initiated
+        collapse/expand actions are never overridden by resize events.
+        """
         super().resizeEvent(event)
-        
         width = event.size().width()
-        threshold = 950
-        
-        if width < threshold and not self._is_collapsed:
+
+        # ── Collapse threshold ───────────────────────────────────────────
+        # Fires when the window narrows below 900 px, freeing ~835 px of
+        # content space for the 2-column card layout before it can clip.
+        if width < 900 and not self._sidebar_auto_collapsed and not self._is_collapsed:
+            self._sidebar_auto_collapsed = True
             self._animate_sidebar(True)
-        elif width >= threshold and self._is_collapsed:
+
+        # ── Expand threshold (80 px hysteresis buffer) ───────────────────
+        # Only restores the sidebar when this logic originally collapsed it
+        # AND the window has grown wide enough to comfortably host it again.
+        elif width > 980 and self._sidebar_auto_collapsed:
+            self._sidebar_auto_collapsed = False
             self._animate_sidebar(False)
 
     # ------------------------------------------------------------------
@@ -431,8 +497,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(dict)
     def _on_stats_ready(self, stats: dict) -> None:
-        # Task 2: Removed _live_status_lbl reference as it is purged.
-        # Use status_bar for live status updates if needed, though showMessage is already set.
+        """Handle the first successful data packet from the monitor worker."""
         if not self._first_data_received:
             self._first_data_received = True
             self._check_initialization_complete()
@@ -473,8 +538,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(dict)
     def _on_monitor_error(self, error: dict) -> None:
+        """Show a transient monitor error in the left footer label, then revert."""
         msg = error.get("message", "Unknown error")
-        self._status_bar.showMessage(f"⚠️  Monitor error: {msg}")
+        self._live_status_lbl.setText(f"⚠️  Monitor error: {msg}")
+        # Revert to the default live indicator after 5 seconds.
+        QTimer.singleShot(5000, lambda: self._live_status_lbl.setText("●  Live — receiving system data"))
 
     @pyqtSlot(int)
     def _switch_page(self, index: int) -> None:
@@ -539,17 +607,23 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(str)
     def _on_serial_connected(self, port: str) -> None:
+        """Update both footer labels when a serial port connects."""
         self._serial_status_lbl.setText(f"🔗  Serial: {port}")
-        self._status_bar.showMessage(f"Connected to {port}.")
+        self._live_status_lbl.setText(f"Connected to {port}.")
+        QTimer.singleShot(4000, lambda: self._live_status_lbl.setText("●  Live — receiving system data"))
 
     @pyqtSlot()
     def _on_serial_disconnected(self) -> None:
+        """Reset the serial label and show a brief notification on the left."""
         self._serial_status_lbl.setText("🔌  Serial: disconnected")
-        self._status_bar.showMessage("Serial connection closed.")
+        self._live_status_lbl.setText("Serial connection closed.")
+        QTimer.singleShot(4000, lambda: self._live_status_lbl.setText("●  Live — receiving system data"))
 
     @pyqtSlot(str)
     def _on_serial_error(self, message: str) -> None:
-        self._status_bar.showMessage(f"⚠️  Serial error: {message}", 5000)
+        """Show a transient serial error in the left footer label, then revert."""
+        self._live_status_lbl.setText(f"⚠️  Serial error: {message}")
+        QTimer.singleShot(5000, lambda: self._live_status_lbl.setText("●  Live — receiving system data"))
 
     # ------------------------------------------------------------------
     # Qt event overrides

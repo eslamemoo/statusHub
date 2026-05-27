@@ -126,7 +126,7 @@ class CircularGauge(QWidget):
         # the actual allocated rectangle.
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumSize(180, 180)
-        self.setMaximumSize(500, 500)
+        self.setMaximumSize(280, 280)
 
         # Prevent global QSS from painting a coloured background on this widget.
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, False)
